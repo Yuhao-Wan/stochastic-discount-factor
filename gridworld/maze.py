@@ -52,35 +52,18 @@ from pycolab import things as plab_things
 from pycolab.prefab_parts import sprites as prefab_sprites
 
 
-# pylint: disable=line-too-long
 MAZES_ART = [
-    # Each maze in MAZES_ART must have exactly one of the patroller sprites
-    # 'a', 'b', and 'c'. I guess if you really don't want them in your maze, you
-    # can always put them down in an unreachable part of the map or something.
-    #
-    # Make sure that the Player will have no way to "escape" the maze.
-    #
-    # Legend:
-    #     '#': impassable walls.            'a': patroller A.
-    #     '@': collectable coins.           'b': patroller B.
-    #     'P': player starting location.    'c': patroller C.
-    #     ' ': boring old maze floor.
-    #
-    # Finally, don't forget to update INITIAL_OFFSET and TEASER_CORNER if you
-    # add or make substantial changes to a level.
-
     # Maze #1
-
-    ['##############################',
-     '# P @ @ @ @ @ @ @ @ @ @ @ @ @#',
-     '#  @ @ @ @ @ @ @ @ @ @ @ @ @ #',
-     '#######  a    ################',
-     '# @ @ @ @ @ @ @ @ @ @ @ @ @ @#',
-     '#  @ @ @ @ @ @ @ @ @ @ @ @ @ #',
-     '###########    b  ############',
-     '# @ @ @ @ @ @ @ @ @ @ @ @ @ @#',
-     '#  @ @ @ @ @ @ @ @ @ @ @ @ @ #',
-     '##############################'],
+    ['####################',
+     '#P @ @ @ @ @ @ @ @ #',
+     '# @ @ @ @ @ @ @ @ @#',
+     '######  a    #######',
+     '#@ @ @ @ @ @ @ @ @ #',
+     '# @ @ @ @ @ @ @ @ @#',
+     '##########    b  ###',
+     '#@ @ @ @ @ @ @ @ @ #',
+     '# @ @ @ @ @ @ @ @ @#',
+     '####################'],
     
     # Maze #2
     ['###########   #################',
@@ -114,7 +97,6 @@ COLOUR_FG = {' ': (0, 0, 0),        # Default black background
              'a': (999, 0, 780),    # Patroller A
              'b': (145, 987, 341)}  # Patroller B
 
-
 COLOUR_BG = {'@': (0, 0, 0)}  # So the coins look like @ and not solid blocks.
 
 
@@ -147,7 +129,7 @@ def make_croppers(level):
   """
   return [
       # The player view.
-      cropping.ScrollingCropper(rows=10, cols=30, to_track=['P'],
+      cropping.ScrollingCropper(rows=10, cols=20, to_track=['P'],
                                 initial_offset=STARTER_OFFSET[level]),
       # The teaser!
       cropping.FixedCropper(top_left_corner=TEASER_CORNER[level],
@@ -174,8 +156,8 @@ class PlayerSprite(prefab_sprites.MazeWalker):
       self._west(board, the_plot)
     elif actions == 3:  # go rightward?
       self._east(board, the_plot)
-    # elif actions == 4:  # stay put? (Not strictly necessary.)
-    #   self._stay(board, the_plot)
+    elif actions == 4:  # stay put? (Not strictly necessary.)
+      self._stay(board, the_plot)
     # if actions == 5:    # just quit?
     #   the_plot.terminate_episode()
 
@@ -206,7 +188,8 @@ class PatrollerSprite(prefab_sprites.MazeWalker):
     # Make our move. If we're now in the same cell as the player, it's instant
     # game over!
     (self._east if self._moving_east else self._west)(board, the_plot)
-    if self.position == things['P'].position: the_plot.terminate_episode()
+    #if self.position == things['P'].position: the_plot.terminate_episode()
+    if self.position == things['P'].position: the_plot.add_reward(np.negative(500))
 
 
 class CashDrape(plab_things.Drape):
@@ -233,7 +216,7 @@ class MazeEnv(gym.Env):
     didn't make any cropping yet 
     """
     action_space = gym.spaces.Discrete(4)  
-    observation_space = gym.spaces.Box(low=0, high=1, shape=[10, 30, 5], dtype=np.uint8) # need to change row, column number when modify environment
+    observation_space = gym.spaces.Box(low=0, high=1, shape=[10, 20, 5], dtype=np.uint8) # need to change row, column number when modify environment
     def _to_obs(self, observation):
         hallway = observation.layers[' '] 
         ob = np.stack([observation.layers[c] for c in 'Pab@'] + [hallway], axis=2).astype(np.uint8)
@@ -241,8 +224,13 @@ class MazeEnv(gym.Env):
 
     def reset(self):
         self._game = make_game(0)
-        observation, reward, _ = self._game.its_showtime()
+        observation, _, _ = self._game.its_showtime()
         return self._to_obs(observation)
+
+    def reset_with_render(self):
+        self._game = make_game(0)
+        observation, _ , _ = self._game.its_showtime()
+        return self._to_obs(observation), observation
 
     def step(self, action):
         observation, reward, _ = self._game.play(action)
@@ -251,18 +239,12 @@ class MazeEnv(gym.Env):
         info = {}
         return self._to_obs(observation), reward, done, info
     
-    # def render(self):
-    #     croppers = make_croppers(0)
-    #     ui = human_ui.CursesUi(
-    #         keys_to_actions={curses.KEY_UP: 0, curses.KEY_DOWN: 1,
-    #                         curses.KEY_LEFT: 2, curses.KEY_RIGHT: 3,
-    #                         -1: 4,
-    #                         'q': 5, 'Q': 5},
-    #         delay=100, colour_fg=COLOUR_FG, colour_bg=COLOUR_BG,
-    #         croppers=croppers)
-    #     ui._display(self._game)
-
-
+    def step_with_render(self, action):
+        observation, reward, _ = self._game.play(action)
+        if reward is None: reward = 0
+        done = self._game.game_over
+        info = {}
+        return self._to_obs(observation), reward, done, info, observation
 
 
 def main(argv=()):

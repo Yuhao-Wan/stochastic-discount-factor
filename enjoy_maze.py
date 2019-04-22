@@ -1,18 +1,50 @@
-import gridworld
 import gym
+import matplotlib.pyplot as plt
+import numpy as np
+
+import gridworld
 from baselines import deepq
+from pycolab import rendering
+
+
+def rgb_rescale(v):
+    return v/255
+
+
+COLOUR_FG = {' ': tuple([rgb_rescale(v) for v in (123, 132, 150)]), # Background
+             '@': tuple([rgb_rescale(v) for v in (214, 182, 79)]),  # Coins
+             '#': tuple([rgb_rescale(v) for v in (119, 107, 122)]), # Walls of the maze
+             'P': tuple([rgb_rescale(v) for v in (153, 85, 74)]),   # Player
+             'a': tuple([rgb_rescale(v) for v in (107, 132, 102)]), # Patroller A
+             'b': tuple([rgb_rescale(v) for v in (107, 132, 102)])} # Patroller B
+
+
+def converter(obs):
+    converter = rendering.ObservationToArray(COLOUR_FG, permute=(0,1,2))
+    converted = np.swapaxes(converter(obs), 1, 2).T
+    return converted
+
 
 def main():
     env = gym.make("maze-v0")
-    act = deepq.learn(env, network='mlp', total_timesteps=100, load_path="maze.pkl")
-
+    act = deepq.learn(env, network='mlp', total_timesteps=100000, load_path="maze.pkl")
     while True:
-        obs, done = env.reset(), False
+        obs, screen_obs = env.reset_with_render()
+        done = False
         episode_rew = 0
+        converted = converter(screen_obs)
+        my_plot = plt.imshow(converted)
         while not done:
-            #env.render()
-            obs, rew, done, _ = env.step(act(obs)[0])
+            obs, rew, done, _ , screen_obs = env.step_with_render(act(obs)[0])
             #nobs, rew, done, _ = env.step(env.action_space.sample())
+            converted = converter(screen_obs)
+            plt.ion()
+            my_plot.autoscale()
+            my_plot.set_data(converted)
+            plt.pause(.1)
+            plt.draw()
+            plt.show()
+            print("action: ", act(obs)[0])
             episode_rew += rew
         print("Episode reward", episode_rew)
 
