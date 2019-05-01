@@ -1,41 +1,61 @@
 import tensorflow as tf
 import gym
+import numpy as np
 import gridworld
+import time
+import datetime
+import matplotlib.pyplot as plt
 
 from baselines import logger
 from baselines import deepq
 from baselines.common import models
-
+from baselines.common import plot_util as pu
 
 # def callback(lcl, _glb):
 #     # stop training if reward exceeds 1500
 #     is_solved = lcl['t'] > 100 and sum(lcl['episode_rewards'][-101:-1]) / 100 >= 1500
 #     return is_solved
 
-
 def main():
-    logger.configure(dir='./logs', format_strs=['csv'])
-    env = gym.make("maze-v0")
-    act = deepq.learn(
-        env,
-        seed=123,
-        network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
-        lr=1e-4,
-        total_timesteps=20000,
-        buffer_size=5000,
-        exploration_fraction=0.9,
-        exploration_final_eps=0.2,
-        learning_starts=5000,
-        target_network_update_freq=500,
-        gamma=0.99,
-        prioritized_replay=True,
-        prioritized_replay_alpha=0.6,
-        print_freq=5
-        #callback=callback
-    )
-    print("Saving model to maze.pkl")
-    act.save("maze.pkl")
+    vals = [200000]
 
+    for val in vals:
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%m-%d-%H-%M')
+        logger.configure(dir='./logs/%s/' % st, format_strs=['csv'])
+
+        kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
+            lr=1e-4,
+            total_timesteps=val,
+            buffer_size=val//10,
+            exploration_fraction=0.9,
+            exploration_final_eps=0.2,
+            learning_starts=5000,
+            target_network_update_freq=500,
+            gamma=0.99,
+            prioritized_replay=True,
+            prioritized_replay_alpha=0.6,
+            print_freq=5)
+        f = open('./logs/%s/params.txt' % st, 'w')
+        f.write(str(kwargs))
+        f.close()
+
+        env = gym.make("maze-v0")
+        act = deepq.learn(
+            env=env,
+            seed=123,
+            **kwargs
+        )
+        print("Saving model to maze.pkl")
+        act.save("./logs/%s/maze.pkl" % st)
+        save_plot(st)
+
+def save_plot(path):
+    results = pu.load_results('./logs/%s' % path)
+    r = results[0]
+    plt.plot(r.progress.episodes, r.progress["mean 100 episode reward"])
+    plt.savefig('./logs/%s/plot.png' % path)
 
 if __name__ == '__main__':
     main()
+
