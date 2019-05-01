@@ -11,13 +11,9 @@ from baselines import deepq
 from baselines.common import models
 from baselines.common import plot_util as pu
 
-# def callback(lcl, _glb):
-#     # stop training if reward exceeds 1500
-#     is_solved = lcl['t'] > 100 and sum(lcl['episode_rewards'][-101:-1]) / 100 >= 1500
-#     return is_solved
 
 def main():
-    vals = [200000]
+    vals = [50000]
 
     for val in vals:
         ts = time.time()

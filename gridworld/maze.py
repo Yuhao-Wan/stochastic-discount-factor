@@ -43,16 +43,16 @@ MAZES_ART = [
      '####################'],
     
     # Maze #2
-    ['###########   #################',
-     '#         #   #               #',
-     '#  ####   #####   #############',
-     '#  #  #                       #',
-     '#  #  #   ######  #######     #',
-     '#  #  #####    #  #     #     #',
-     '#  #           #  #     #     #',
-     '#  #           #  #     #     #',
-     '#P #           ####     #  @  #',
-     '####                    #######']]
+    ['###########  #######',
+     '#         #  #     #',
+     '#  ####   ####  ####',
+     '#  #  #            #',
+     '#  #  #  ###  #### #',
+     '#  #  #  # #  #  # #',
+     '#  #  #  # #  #  # #',
+     '#  #  #### #  #  # #',
+     '#P #       ####  #@#',
+     '####             ###']]
 
 
 # The "teaser observations" (see docstring) have their top-left corners at these
@@ -201,11 +201,13 @@ class MazeEnv(gym.Env):
 
     def reset(self):
         self._game = make_game(0)
+        #self._game = make_game(1)
         observation, _, _ = self._game.its_showtime()
         return self._to_obs(observation)
 
     def reset_with_render(self):
         self._game = make_game(0)
+        #self._game = make_game(1)
         observation, _ , _ = self._game.its_showtime()
         return self._to_obs(observation), observation
 
