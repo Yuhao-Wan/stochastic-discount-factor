@@ -1,9 +1,11 @@
 import gym
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 
 import gridworld
 from baselines import deepq
+from baselines.common import models
 from pycolab import rendering
 
 
@@ -27,7 +29,12 @@ def converter(obs):
 
 def main():
     env = gym.make("maze-v0")
-    act = deepq.learn(env, network='mlp', total_timesteps=100000, load_path="maze.pkl")
+    act = deepq.learn(
+                    env, 
+                    network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
+                    total_timesteps=0,
+                    load_path="maze.pkl")
+    
     while True:
         obs, screen_obs = env.reset_with_render()
         done = False

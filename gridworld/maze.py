@@ -12,29 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A scrolling maze to explore. Collect all of the coins!
-
-Better Scrolly Maze is better than Scrolly Maze because it uses a much simpler
-scrolling mechanism: cropping! As far as the pycolab engine is concerned, the
-game world doesn't scroll at all: it just renders observations that are the size
-of the entire map. Only later do "cropper" objects crop out a part of the
-observation to give the impression of a moving world.
-
-This cropping mechanism also makes it easier to derive multiple observations
-from the same game, so the human user interface shows three views of the map at
-once: a moving view that follows the player, another one that follows the
-Patroller Sprite identified by the 'c' character, and a third that remains fixed
-on a tantalisingly large hoard of gold coins, tempting the player to explore.
-
-Regrettably, the cropper approach does mean that we have to give up the cool
-starfield floating behind the map in Scrolly Maze. If you like the starfield a
-lot, then Better Scrolly Maze isn't actually better.
-
-Command-line usage: `better_scrolly_maze.py <level>`, where `<level>` is an
-optional integer argument selecting Better Scrolly Maze levels 0, 1, or 2.
-
-Keys: up, down, left, right - move. q - quit.
-"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -188,8 +165,8 @@ class PatrollerSprite(prefab_sprites.MazeWalker):
     # Make our move. If we're now in the same cell as the player, it's instant
     # game over!
     (self._east if self._moving_east else self._west)(board, the_plot)
-    #if self.position == things['P'].position: the_plot.terminate_episode()
-    if self.position == things['P'].position: the_plot.add_reward(np.negative(500))
+    if self.position == things['P'].position: the_plot.terminate_episode()
+    #if self.position == things['P'].position: the_plot.add_reward(np.negative(500))
 
 
 class CashDrape(plab_things.Drape):
