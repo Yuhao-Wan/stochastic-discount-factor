@@ -24,7 +24,7 @@ def main():
             kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
                 lr=1e-4,
                 total_timesteps=2000000,
-                total_timesteps=200000,
+                buffer_size=200000,
                 exploration_fraction=0.5,
                 exploration_final_eps=0.02,
                 learning_starts=2000,
