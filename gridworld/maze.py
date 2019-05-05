@@ -1,18 +1,3 @@
-# Copyright 2017 the pycolab Authors
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -32,14 +17,14 @@ from pycolab.prefab_parts import sprites as prefab_sprites
 MAZES_ART = [
     # Maze #1
     ['####################',
-     '#P @ @ @ @ @ @ @ @ #',
-     '# @ @ @ @ @ @ @ @ @#',
+     '#P $ @ $ @ $ @ $ @ #',
+     '# @ $ $ $ $ $ $ $ $#',
      '######  a    #######',
-     '#@ @ @ @ @ @ @ @ @ #',
-     '# @ @ @ @ @ @ @ @ @#',
+     '#$ $ @ $ $ $ $ @ $ #',
+     '# $ $ $ $ @ $ $ $ $#',
      '##########    b  ###',
-     '#@ @ @ @ @ @ @ @ @ #',
-     '# @ @ @ @ @ @ @ @ @#',
+     '#$ $ @ $ $ $ $ $ @ #',
+     '# $ $ $ @ $ $ @ $ $#',
      '####################'],
     
     # Maze #2
@@ -51,7 +36,7 @@ MAZES_ART = [
      '#  #  #  # #  #  # #',
      '#  #  #  # #  #  # #',
      '#  #  #### #  #  # #',
-     '#P #       ####  #@#',
+     '#P #       ####  #$#',
      '####             ###']]
 
 
@@ -68,13 +53,15 @@ STARTER_OFFSET = [(0, 0),   # For level 0
 
 # These colours are only for humans to see in the CursesUi.
 COLOUR_FG = {' ': (0, 0, 0),        # Default black background
-             '@': (999, 862, 110),  # Shimmering golden coins
+             '$': (999, 862, 110),  # Shimmering golden coins
+             '@': (66, 6, 13),      # Poison
              '#': (764, 0, 999),    # Walls of the maze
              'P': (0, 999, 999),    # This is you, the player
              'a': (999, 0, 780),    # Patroller A
              'b': (145, 987, 341)}  # Patroller B
 
-COLOUR_BG = {'@': (0, 0, 0)}  # So the coins look like @ and not solid blocks.
+COLOUR_BG = {'$': (0, 0, 0),
+             '@': (0, 0, 0) }  # So the coins look like $ and not solid blocks.
 
 
 def make_game(level):
@@ -86,9 +73,10 @@ def make_game(level):
           'a': PatrollerSprite,
           'b': PatrollerSprite},
       drapes={
-          '@': CashDrape},
-      update_schedule=['a', 'b', 'P', '@'],
-      z_order='ab@P')
+          '$': CashDrape,
+          '@': PoisonDrape},
+      update_schedule=['a', 'b', 'P', '$','@'],
+      z_order='ab$@P')
 
 
 def make_croppers(level):
@@ -121,22 +109,25 @@ class PlayerSprite(prefab_sprites.MazeWalker):
     """Constructor: just tells `MazeWalker` we can't walk through walls."""
     super(PlayerSprite, self).__init__(
         corner, position, character, impassable='#')
+    self.num_steps = 0
 
   def update(self, actions, board, layers, backdrop, things, the_plot):
     del backdrop, things, layers  # Unused
+    self.num_steps += 1
 
-    if actions == 0:    # go upward?
+    if actions == 0:    # go upward
       self._north(board, the_plot)
-    elif actions == 1:  # go downward?
+    elif actions == 1:  # go downward
       self._south(board, the_plot)
-    elif actions == 2:  # go leftward?
+    elif actions == 2:  # go leftward
       self._west(board, the_plot)
-    elif actions == 3:  # go rightward?
+    elif actions == 3:  # go rightward
       self._east(board, the_plot)
-    elif actions == 4:  # stay put? (Not strictly necessary.)
+    elif actions == 4:  # stay put
       self._stay(board, the_plot)
-    # if actions == 5:    # just quit?
-    #   the_plot.terminate_episode()
+    if self.num_steps == 200: # terminate when reached max episode steps
+      the_plot.terminate_episode()
+      self.num_steps = 0
 
 
 class PatrollerSprite(prefab_sprites.MazeWalker):
@@ -166,7 +157,6 @@ class PatrollerSprite(prefab_sprites.MazeWalker):
     # game over!
     (self._east if self._moving_east else self._west)(board, the_plot)
     if self.position == things['P'].position: the_plot.terminate_episode()
-    #if self.position == things['P'].position: the_plot.add_reward(np.negative(500))
 
 
 class CashDrape(plab_things.Drape):
@@ -177,7 +167,7 @@ class CashDrape(plab_things.Drape):
   """
 
   def update(self, actions, board, layers, backdrop, things, the_plot):
-    # If the player has reached a coin, credit one reward and remove the coin
+    # If the player has reached a coin, credit reward 100 and remove the coin
     # from the scrolling pattern. If the player has obtained all coins, quit!
     player_pattern_position = things['P'].position
 
@@ -187,16 +177,34 @@ class CashDrape(plab_things.Drape):
       self.curtain[player_pattern_position] = False
       if not self.curtain.any(): the_plot.terminate_episode()
 
+
+class PoisonDrape(plab_things.Drape):
+  """A `Drape` handling all of the coins.
+
+  This Drape detects when a player traverses a coin, removing the coin and
+  crediting the player for the collection. Terminates if all coins are gone.
+  """
+
+  def update(self, actions, board, layers, backdrop, things, the_plot):
+    # If the player has reached a poison, deleted 100 reward and remove the coin
+    # from the scrolling pattern. 
+    player_pattern_position = things['P'].position
+
+    if self.curtain[player_pattern_position]:
+      the_plot.log('Poison collected at {}!'.format(player_pattern_position))
+      the_plot.add_reward(-100)
+      self.curtain[player_pattern_position] = False
+      if not self.curtain.any(): the_plot.terminate_episode()
+
 class MazeEnv(gym.Env):
     """
     Wrapper to adapt to OpenAI's gym interface.
-    didn't make any cropping yet 
     """
     action_space = gym.spaces.Discrete(4)  
-    observation_space = gym.spaces.Box(low=0, high=1, shape=[10, 20, 5], dtype=np.uint8) # need to change row, column number when modify environment
+    observation_space = gym.spaces.Box(low=0, high=1, shape=[10, 20, 6], dtype=np.uint8) # need to change row, column number when modify environment
     def _to_obs(self, observation):
         hallway = observation.layers[' '] 
-        ob = np.stack([observation.layers[c] for c in 'Pab@'] + [hallway], axis=2).astype(np.uint8)
+        ob = np.stack([observation.layers[c] for c in 'Pab$@'] + [hallway], axis=2).astype(np.uint8)
         return ob
 
     def reset(self):
@@ -224,29 +232,3 @@ class MazeEnv(gym.Env):
         done = self._game.game_over
         info = {}
         return self._to_obs(observation), reward, done, info, observation
-
-
-def main(argv=()):
-  level = int(argv[1]) if len(argv) > 1 else 0
-
-  # Build a Better Scrolly Maze game.
-  game = make_game(level)
-  # Build the croppers we'll use to scroll around in it, etc.
-  croppers = make_croppers(level)
-
-  # Make a CursesUi to play it with.
-  ui = human_ui.CursesUi(
-      keys_to_actions={curses.KEY_UP: 0, curses.KEY_DOWN: 1,
-                       curses.KEY_LEFT: 2, curses.KEY_RIGHT: 3,
-                       -1: 4,
-                       'q': 5, 'Q': 5},
-      delay=100, colour_fg=COLOUR_FG, colour_bg=COLOUR_BG,
-      croppers=croppers)
-
-  # Let the game begin!
-  ui.play(game)
-
-
-if __name__ == '__main__':
-  main(sys.argv)
-

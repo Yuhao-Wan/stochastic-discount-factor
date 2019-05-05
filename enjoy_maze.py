@@ -14,7 +14,8 @@ def rgb_rescale(v):
 
 
 COLOUR_FG = {' ': tuple([rgb_rescale(v) for v in (123, 132, 150)]), # Background
-             '@': tuple([rgb_rescale(v) for v in (214, 182, 79)]),  # Coins
+             '$': tuple([rgb_rescale(v) for v in (214, 182, 79)]),  # Coins
+             '@': tuple([rgb_rescale(v) for v in (66, 6, 13)]),     # Poison
              '#': tuple([rgb_rescale(v) for v in (119, 107, 122)]), # Walls of the maze
              'P': tuple([rgb_rescale(v) for v in (153, 85, 74)]),   # Player
              'a': tuple([rgb_rescale(v) for v in (107, 132, 102)]), # Patroller A
@@ -33,7 +34,7 @@ def main():
                     env, 
                     network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
                     total_timesteps=0,
-                    load_path="maze2.pkl")
+                    load_path="./logs/05-05-15-26/maze.pkl")
     
     while True:
         obs, screen_obs = env.reset_with_render()
@@ -42,8 +43,8 @@ def main():
         converted = converter(screen_obs)
         my_plot = plt.imshow(converted)
         while not done:
-            obs, rew, done, _ , screen_obs = env.step_with_render(act(obs)[0])
-            #nobs, rew, done, _ = env.step(env.action_space.sample())
+            #obs, rew, done, _ , screen_obs = env.step_with_render(act(obs)[0])
+            obs, rew, done, _ , screen_obs = env.step_with_render(env.action_space.sample())
             converted = converter(screen_obs)
             plt.ion()
             my_plot.autoscale()
