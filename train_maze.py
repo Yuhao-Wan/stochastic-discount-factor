@@ -5,24 +5,25 @@ import numpy as np
 import gridworld
 import matplotlib.pyplot as plt
 
+import deepq
 from baselines import logger
-from baselines import deepq
 from baselines.common import models
 from baselines.common import plot_util as pu
 
 
-def main(discount, path):
+def main(path):
     logger.configure(dir='./logs/%s/' % path, format_strs=['csv'])
 
     kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
         lr=1e-4,
-        total_timesteps=2000000,
-        buffer_size=200000,
-        exploration_fraction=0.5,
+        total_timesteps=20000,
+        buffer_size=2000,
+        exploration_fraction=0.1,
         exploration_final_eps=0.02,
         learning_starts=2000,
         target_network_update_freq=500,
-        gamma=discount,
+        myopic_fraction=0.2,
+        final_gamma=0.99,
         prioritized_replay=True,
         prioritized_replay_alpha=0.6,
         print_freq=5)
@@ -48,6 +49,5 @@ def save_plot(path):
     plt.savefig('./logs/%s/plot.png' % path)
 
 if __name__ == '__main__':
-    discount = float(sys.argv[1])
-    main(discount, sys.argv[2])
+    main(sys.argv[1])
 
