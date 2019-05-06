@@ -14,7 +14,7 @@ from baselines.common import plot_util as pu
 
 def main():
     with tf.Graph().as_default():
-        vals = [0.4, 0.5, 0.6]
+        vals = [0.5, 0.6, 0.7]
 
         for val in vals:
             ts = time.time()
