@@ -14,7 +14,7 @@ from baselines.common import plot_util as pu
 
 def main():
     with tf.Graph().as_default():
-        vals = [0.99]
+        vals = [0.4, 0.5, 0.6]
 
         for val in vals:
             ts = time.time()
@@ -25,8 +25,8 @@ def main():
                 lr=1e-4,
                 total_timesteps=2000000,
                 buffer_size=200000,
-                exploration_fraction=1.0,
-                exploration_final_eps=1.0,
+                exploration_fraction=0.5,
+                exploration_final_eps=0.02,
                 learning_starts=2000,
                 target_network_update_freq=500,
                 gamma=val,
