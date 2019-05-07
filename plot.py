@@ -13,4 +13,4 @@ for i in range(11):
     names.append(name)
 
 plt.legend(names)
-plt.savefig('./logs/exp1/plot3.png')
+plt.savefig('./logs/exp1/plot.png')
