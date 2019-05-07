@@ -11,19 +11,19 @@ from baselines.common import models
 from baselines.common import plot_util as pu
 
 
-def main(path):
+def main(fraction, gamma, path):
     logger.configure(dir='./logs/%s/' % path, format_strs=['csv'])
 
     kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
         lr=1e-4,
-        total_timesteps=20000,
-        buffer_size=2000,
+        total_timesteps=2000000,
+        buffer_size=200000,
         exploration_fraction=0.1,
-        exploration_final_eps=0.02,
+        exploration_final_eps=0.02, 
         learning_starts=2000,
         target_network_update_freq=500,
-        myopic_fraction=0.2,
-        final_gamma=0.99,
+        myopic_fraction=fraction,
+        final_gamma=gamma,
         prioritized_replay=True,
         prioritized_replay_alpha=0.6,
         print_freq=5)
@@ -49,5 +49,7 @@ def save_plot(path):
     plt.savefig('./logs/%s/plot.png' % path)
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    fraction = float(sys.argv[1])
+    gamma = float(sys.argv[2])
+    main(fraction, gamma, sys.argv[3])
 
