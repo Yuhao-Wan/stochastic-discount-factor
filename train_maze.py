@@ -41,6 +41,7 @@ def main(discount, path):
     act.save("./logs/%s/maze.pkl" % path)
     save_plot(path)
 
+
 def save_plot(path):
     results = pu.load_results('./logs/%s' % path)
     r = results[0]
