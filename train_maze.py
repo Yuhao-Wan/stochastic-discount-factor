@@ -11,35 +11,37 @@ from baselines.common import models
 from baselines.common import plot_util as pu
 
 
-def main(seed, fraction, gamma, path):
-    logger.configure(dir='./logs/maze2-ascend/%s/%s/' % (path, seed), format_strs=['csv'])
+def main(seed, fraction, gamma, path, gpu):
+    with tf.device('/device:GPU:%s' % gpu):
 
-    kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
-        lr=1e-4,
-        total_timesteps=1500000,
-        buffer_size=150000,
-        exploration_fraction=0.2,
-        exploration_final_eps=0.02, 
-        learning_starts=2000,
-        target_network_update_freq=500,
-        myopic_fraction=fraction,
-        final_gamma=gamma,
-        prioritized_replay=True,
-        prioritized_replay_alpha=0.6,
-        print_freq=5)
+        logger.configure(dir='./logs/maze2-ascend/%s/%s/' % (path, seed), format_strs=['csv'])
 
-    f = open('./logs/maze2-ascend/%s/%s/params.txt' % (path, seed), 'w')
-    f.write(str(kwargs))
-    f.close()
+        kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
+            lr=1e-4,
+            total_timesteps=1500000,
+            buffer_size=150000,
+            exploration_fraction=0.2,
+            exploration_final_eps=0.02, 
+            learning_starts=2000,
+            target_network_update_freq=500,
+            myopic_fraction=fraction,
+            final_gamma=gamma,
+            prioritized_replay=True,
+            prioritized_replay_alpha=0.6,
+            print_freq=5)
 
-    env = gym.make("maze-v0")
-    act = deepq.learn(
-        env=env,
-        **kwargs
-    )
-    print("Saving model to maze.pkl")
-    act.save("./logs/maze2-ascend/%s/%s/maze.pkl" % (path, seed))
-    save_plot(path, seed)
+        f = open('./logs/maze2-ascend/%s/%s/params.txt' % (path, seed), 'w')
+        f.write(str(kwargs))
+        f.close()
+
+        env = gym.make("maze-v0")
+        act = deepq.learn(
+            env=env,
+            **kwargs
+        )
+        print("Saving model to maze.pkl")
+        act.save("./logs/maze2-ascend/%s/%s/maze.pkl" % (path, seed))
+        save_plot(path, seed)
 
 
 def save_plot(path, seed):
@@ -53,5 +55,6 @@ if __name__ == '__main__':
     fraction = float(sys.argv[2])
     gamma = float(sys.argv[3])
     path = sys.argv[4]
-    main(seed, fraction, gamma, path)
+    gpu = sys.argv[5]
+    main(seed, fraction, gamma, path, gpu)
 
