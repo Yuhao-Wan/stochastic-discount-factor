@@ -11,14 +11,15 @@ from baselines.common import models
 from baselines.common import plot_util as pu
 
 
-def main(discount, path):
+def main(seed, discount, path):
     logger.configure(dir='./logs/%s/' % path, format_strs=['csv'])
 
-    kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
+    kwargs = dict(seed=seed,
+        network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
         lr=1e-4,
-        total_timesteps=2000000,
-        buffer_size=200000,
-        exploration_fraction=0.5,
+        total_timesteps=1500000,
+        buffer_size=150000,
+        exploration_fraction=0.2,
         exploration_final_eps=0.02,
         learning_starts=2000,
         target_network_update_freq=500,
@@ -34,7 +35,6 @@ def main(discount, path):
     env = gym.make("maze-v0")
     act = deepq.learn(
         env=env,
-        seed=123,
         **kwargs
     )
     print("Saving model to maze.pkl")
@@ -49,6 +49,7 @@ def save_plot(path):
     plt.savefig('./logs/%s/plot.png' % path)
 
 if __name__ == '__main__':
-    discount = float(sys.argv[1])
-    main(discount, sys.argv[2])
+    seed = int(sys.argv[1])
+    discount = float(sys.argv[2])
+    main(seed, discount, sys.argv[3])
 
