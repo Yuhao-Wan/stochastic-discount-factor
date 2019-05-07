@@ -11,14 +11,14 @@ from baselines.common import models
 from baselines.common import plot_util as pu
 
 
-def main(fraction, gamma, path):
-    logger.configure(dir='./logs/%s/' % path, format_strs=['csv'])
+def main(seed, fraction, gamma, path):
+    logger.configure(dir='./logs/maze1-ascend/%s/%s/' % (path, seed), format_strs=['csv'])
 
     kwargs = dict(network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
         lr=1e-4,
-        total_timesteps=2000000,
-        buffer_size=200000,
-        exploration_fraction=0.5,
+        total_timesteps=1500000,
+        buffer_size=150000,
+        exploration_fraction=0.2,
         exploration_final_eps=0.02, 
         learning_starts=2000,
         target_network_update_freq=500,
@@ -28,28 +28,29 @@ def main(fraction, gamma, path):
         prioritized_replay_alpha=0.6,
         print_freq=5)
 
-    f = open('./logs/%s/params.txt' % path, 'w')
+    f = open('./logs/maze1-ascend/%s/%s/params.txt' % (path, seed), 'w')
     f.write(str(kwargs))
     f.close()
 
     env = gym.make("maze-v0")
     act = deepq.learn(
         env=env,
-        seed=123,
         **kwargs
     )
     print("Saving model to maze.pkl")
-    act.save("./logs/%s/maze.pkl" % path)
-    save_plot(path)
+    act.save("./logs/maze1-ascend/%s/%s/maze.pkl" % (path, seed))
+    save_plot(path, seed)
 
-def save_plot(path):
-    results = pu.load_results('./logs/%s' % path)
+
+def save_plot(path, seed):
+    results = pu.load_results('./logs/maze1-ascend/%s/%s/' % (path, seed))
     r = results[0]
     plt.plot(r.progress.steps, r.progress["mean 100 episode reward"])
-    plt.savefig('./logs/%s/plot.png' % path)
+    plt.savefig('./logs/maze1-ascend/%s/%s/plot.png' % (path, seed))
 
 if __name__ == '__main__':
-    fraction = float(sys.argv[1])
-    gamma = float(sys.argv[2])
-    main(fraction, gamma, sys.argv[3])
-
+    seed = int(sys.argv[1])
+    fraction = float(sys.argv[2])
+    gamma = float(sys.argv[3])
+    path = sys.argv[4]
+    main(seed, fraction, gamma, path)
