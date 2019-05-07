@@ -29,12 +29,12 @@ MAZES_ART = [
     
     # Maze #2
     ['###########  #######',
-     '#         #  #     #',
+     '#        @#  #     #',
      '#  ####   ####  ####',
      '#  #  #            #',
      '#  #  #  ###  #### #',
      '#  #  #  # #  #  # #',
-     '#  #  #  # #  #  # #',
+     '#  #  # $# #  #  # #',
      '#  #  #### #  #  # #',
      '#P #       ####  #$#',
      '####             ###']]
@@ -208,14 +208,12 @@ class MazeEnv(gym.Env):
         return ob
 
     def reset(self):
-        self._game = make_game(0)
-        #self._game = make_game(1)
+        self._game = make_game(1)
         observation, _, _ = self._game.its_showtime()
         return self._to_obs(observation)
 
     def reset_with_render(self):
-        self._game = make_game(0)
-        #self._game = make_game(1)
+        self._game = make_game(1)
         observation, _ , _ = self._game.its_showtime()
         return self._to_obs(observation), observation
 
