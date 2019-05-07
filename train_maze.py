@@ -12,7 +12,7 @@ from baselines.common import plot_util as pu
 
 
 def main(seed, discount, path):
-    logger.configure(dir='./logs/%s/' % path, format_strs=['csv'])
+    logger.configure(dir='./logs/%s/%s/' % (path, seed), format_strs=['csv'])
 
     kwargs = dict(seed=seed,
         network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
@@ -28,7 +28,7 @@ def main(seed, discount, path):
         prioritized_replay_alpha=0.6,
         print_freq=5)
 
-    f = open('./logs/%s/params.txt' % path, 'w')
+    f = open('./logs/%s/%s/params.txt' % (path, seed), 'w')
     f.write(str(kwargs))
     f.close()
 
@@ -38,15 +38,15 @@ def main(seed, discount, path):
         **kwargs
     )
     print("Saving model to maze.pkl")
-    act.save("./logs/%s/maze.pkl" % path)
-    save_plot(path)
+    act.save("./logs/%s/%s/maze.pkl" % (path, seed))
+    save_plot(path, seed)
 
 
-def save_plot(path):
-    results = pu.load_results('./logs/%s' % path)
+def save_plot(path, seed):
+    results = pu.load_results('./logs/%s/%s/' % (path, seed))
     r = results[0]
     plt.plot(r.progress.steps, r.progress["mean 100 episode reward"])
-    plt.savefig('./logs/%s/plot.png' % path)
+    plt.savefig('./logs/%s/%s/plot.png' % (path, seed))
 
 if __name__ == '__main__':
     seed = int(sys.argv[1])
