@@ -18,7 +18,7 @@ def main(fraction, gamma, path):
         lr=1e-4,
         total_timesteps=2000000,
         buffer_size=200000,
-        exploration_fraction=0.1,
+        exploration_fraction=0.5,
         exploration_final_eps=0.02, 
         learning_starts=2000,
         target_network_update_freq=500,
