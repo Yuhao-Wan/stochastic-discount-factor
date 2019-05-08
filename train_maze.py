@@ -11,36 +11,37 @@ from baselines.common import models
 from baselines.common import plot_util as pu
 
 
-def main(seed, fraction, discount, path):
+def main(seed, fraction, discount, path, gpu):
+    with tf.device('/device:GPU:%s' % gpu):
 
-    logger.configure(dir='./logs/simple/%s/%s/' % (path, seed), format_strs=['csv'])
+        logger.configure(dir='./logs/simple/%s/%s/' % (path, seed), format_strs=['csv'])
 
-    kwargs = dict(seed=seed,
-        network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
-        lr=1e-4,
-        total_timesteps=500000,
-        buffer_size=50000,
-        exploration_fraction=fraction,
-        exploration_final_eps=0.01,
-        learning_starts=2000,
-        target_network_update_freq=500,
-        gamma=discount,
-        prioritized_replay=True,
-        prioritized_replay_alpha=0.6,
-        print_freq=5)
+        kwargs = dict(seed=seed,
+            network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
+            lr=1e-4,
+            total_timesteps=500000,
+            buffer_size=50000,
+            exploration_fraction=fraction,
+            exploration_final_eps=0.01,
+            learning_starts=2000,
+            target_network_update_freq=500,
+            gamma=discount,
+            prioritized_replay=True,
+            prioritized_replay_alpha=0.6,
+            print_freq=5)
 
-    f = open('./logs/simple/%s/%s/params.txt' % (path, seed), 'w')
-    f.write(str(kwargs))
-    f.close()
+        f = open('./logs/simple/%s/%s/params.txt' % (path, seed), 'w')
+        f.write(str(kwargs))
+        f.close()
 
-    env = gym.make("maze-v0")
-    act = deepq.learn(
-        env=env,
-        **kwargs
-    )
-    print("Saving model to maze.pkl")
-    act.save("./logs/simple/%s/%s/maze.pkl" % (path, seed))
-    save_plot(path, seed)
+        env = gym.make("maze-v0")
+        act = deepq.learn(
+            env=env,
+            **kwargs
+        )
+        print("Saving model to maze.pkl")
+        act.save("./logs/simple/%s/%s/maze.pkl" % (path, seed))
+        save_plot(path, seed)
 
 
 def save_plot(path, seed):
@@ -54,5 +55,6 @@ if __name__ == '__main__':
     fraction = float(sys.argv[2])
     discount = float(sys.argv[3])
     path = sys.argv[4]
-    main(seed, fraction, discount, path)
+    gpu = sys.argv[5]
+    main(seed, fraction, discount, path, gpu)
 

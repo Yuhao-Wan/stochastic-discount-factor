@@ -67,7 +67,7 @@ class PlayerSprite(prefab_sprites.MazeWalker):
       self._east(board, the_plot)
     elif actions == 2:  # stay put
       self._stay(board, the_plot)
-    if self.num_steps == 40: # terminate when reached max episode steps
+    if self.num_steps == 50: # terminate when reached max episode steps
       the_plot.terminate_episode()
       self.num_steps = 0
 
