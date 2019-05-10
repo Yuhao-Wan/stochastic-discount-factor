@@ -5,7 +5,7 @@ from baselines import logger
 import plot_util as pu
 
 
-dirs = './logs/maze1-comparison/final099/'
+dirs = './logs/maze2/'
 
 results = pu.load_results(dirs, enable_progress=True, enable_monitor=False, verbose=True)
 
