@@ -1,1 +1,0 @@
-{'network': <function mlp.<locals>.network_fn at 0x7fb4afeca0d0>, 'lr': 0.0001, 'total_timesteps': 2000000, 'buffer_size': 200000, 'exploration_fraction': 0.5, 'exploration_final_eps': 0.02, 'learning_starts': 2000, 'target_network_update_freq': 500, 'gamma': 0.4, 'prioritized_replay': True, 'prioritized_replay_alpha': 0.6, 'print_freq': 5}
