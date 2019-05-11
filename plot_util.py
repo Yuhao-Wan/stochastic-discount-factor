@@ -168,7 +168,7 @@ def plot_results(
             ax.legend(
                 g2l.values(),
                 ['%s (%i)'%(g, g2c[g]) for g in g2l] if average_group else g2l.keys(),
-                loc=2 if legend_outside else None,
+                loc=2 if legend_outside else 4,
                 bbox_to_anchor=(1,1) if legend_outside else None)
         ax.set_title(sk)
         # add xlabels, but only to the bottom row
