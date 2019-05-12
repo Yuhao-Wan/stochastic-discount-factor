@@ -6,12 +6,11 @@ from baselines import bench
 from baselines import logger
 from baselines.ppo2 import ppo2
 from baselines.common.vec_env import DummyVecEnv
-import ppo2
 
 
-dirs = './logs/ppo-pendulum/ascend/'
+dirs = './logs/ppo-pendulum/baselines/'
 
-def main(gpu, seed, lam_fraction, final_lam, path):
+def main(gpu, seed, path):
     with tf.device('/device:GPU:%s' % gpu):
 
         logger.configure(dir=dirs+'%s/%s/' % (path, seed))
@@ -21,12 +20,9 @@ def main(gpu, seed, lam_fraction, final_lam, path):
         env = DummyVecEnv([lambda: env]) 
 
         kwargs = dict(network='mlp', 
-                      env=env, 
-                      total_timesteps=200000, 
-                      seed=seed,
-                      lam=0.1, 
-                      lam_fraction=lam_fraction, 
-                      final_lam=final_lam)
+                  env=env, 
+                  total_timesteps=2000000, 
+                  seed=seed)
 
         f = open(dirs+'%s/%s/params.txt' % (path, seed), 'w')
         f.write(str(kwargs))
@@ -41,8 +37,6 @@ def main(gpu, seed, lam_fraction, final_lam, path):
 if __name__ == '__main__':
     gpu = int(sys.argv[1])
     seed = int(sys.argv[2])
-    lam_fraction = float(sys.argv[3])
-    final_lam = float(sys.argv[4])
-    path = sys.argv[5]
+    path = sys.argv[3]
 
-    main(gpu, seed, lam_fraction, final_lam, path)
+    main(gpu, seed, path)
