@@ -1,4 +1,5 @@
 import sys
+import gym
 import tensorflow as tf
 from baselines import deepq
 from baselines import bench
@@ -12,9 +13,9 @@ def main(gpu, seed, lam_fraction, final_lam, path):
     
     with tf.device('/device:GPU:%s' % gpu):
 
-        logger.configure(dir='./logs/ppo-ascend/%s/%s/' % (path, seed))
+        logger.configure(dir='./logs/lander-ascend/%s/%s/' % (path, seed))
         
-        env = make_atari('LunarLanderContinuous-v2')
+        env = gym.make('LunarLanderContinuous-v2')
         env = bench.Monitor(env, logger.get_dir())
         env = DummyVecEnv([lambda: env]) 
 
@@ -22,7 +23,7 @@ def main(gpu, seed, lam_fraction, final_lam, path):
                            seed=seed, lam=0.1, lam_fraction=lam_fraction, 
                            final_lam=final_lam)
 
-        model.save('./logs/ppo-ascend/%s/%s/model.pkl' % (path, seed))
+        model.save('./logs/lander-ascend/%s/%s/model.pkl' % (path, seed))
         env.close()
 
 if __name__ == '__main__':
