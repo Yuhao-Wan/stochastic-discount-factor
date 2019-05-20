@@ -1,16 +1,23 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from baselines.common import plot_util as pu
+
 from baselines import logger
+import plot_util as pu
 
-#print(logger.get_dir())
-results = pu.load_results('~/Desktop/Scholars/stochastic-discount-factor/logs/exp1')
-names = []
-for i in range(11):
-    r = results[i]
-    name = r.dirname.split('/')[-1]
-    plt.plot(np.divide(r.progress.steps, 1000), r.progress["mean 100 episode reward"])
-    names.append(name)
 
-plt.legend(names)
-plt.savefig('./logs/exp1/plot3.png')
+dirs = './logs/initial-trial/maze1/'
+#dirs = './logs/mujoco-comparison/095/'
+
+
+results = pu.load_results(dirs, enable_progress=True, enable_monitor=False, verbose=True)
+
+pu.plot_results(results,
+                xy_fn=pu.xy_fn,
+                average_group=False,
+                split_fn=lambda _: '',
+                group_fn=pu.split_fn,
+                shaded_std=False,
+                shaded_err=False)
+#plt.xlim((0, 7200))
+plt.tight_layout()
+plt.savefig(dirs+'plot.png')

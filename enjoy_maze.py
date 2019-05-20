@@ -33,7 +33,8 @@ def main():
                     env, 
                     network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
                     total_timesteps=0,
-                    load_path="./logs/simple/09099/1/maze.pkl")
+
+                    load_path="./logs/maze1/gamma099/1/maze.pkl")
     
     while True:
         obs, screen_obs = env.reset_with_render()
