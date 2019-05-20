@@ -12,7 +12,7 @@ from baselines import logger
 from baselines.common.schedules import LinearSchedule
 from baselines.common import set_global_seeds
 
-import build_graph
+from deepq import build_graph
 from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 from baselines.deepq.utils import ObservationInput
 

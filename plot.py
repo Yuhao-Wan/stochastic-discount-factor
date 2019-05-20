@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from baselines import logger
-import plot_util as pu
+from common import plot_util as pu
 
 
-dirs = './logs/'
+dirs = './logs/myo-exp/gamma099/'
 
 
 results = pu.load_results(dirs, enable_progress=True, enable_monitor=False, verbose=True)
@@ -18,6 +18,5 @@ pu.plot_results(results,
                 shaded_std=True,
                 shaded_err=False)
 
-#plt.xlim((0, 7200))
 plt.tight_layout()
 plt.savefig(dirs+'plot.png')

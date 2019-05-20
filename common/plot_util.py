@@ -67,7 +67,7 @@ def xy_fn(r):
 
 def split_fn(r):
     import re 
-    match = re.search(r'[^/-]+(?=(-\d+)?\Z)', r.dirname.split('/')[-1])
+    match = re.search(r'[^/-]+(?=(-\d+)?\Z)', r.dirname.split('/')[-2])
     if match:
         return match.group(0)
 
@@ -171,7 +171,7 @@ def plot_results(
                 g2l.values(),
                 ['%s (%i)'%(g, g2c[g]) for g in g2l] if average_group else g2l.keys(),
                 loc=2 if legend_outside else 4,
-                prop={'size': 21},
+                prop={'size': 12},
                 bbox_to_anchor=(1,1) if legend_outside else None)
         ax.set_title(sk)
         # add xlabels, but only to the bottom row

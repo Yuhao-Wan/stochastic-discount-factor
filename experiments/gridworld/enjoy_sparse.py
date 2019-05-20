@@ -9,6 +9,8 @@ from baselines.common import models
 from pycolab import rendering
 
 
+dirs = "./logs/maze2/gamma08/1/maze.pkl"
+
 def rgb_rescale(v):
     return v/255
 
@@ -17,9 +19,7 @@ COLOUR_FG = {' ': tuple([rgb_rescale(v) for v in (123, 132, 150)]), # Background
              '$': tuple([rgb_rescale(v) for v in (214, 182, 79)]),  # Coins
              '@': tuple([rgb_rescale(v) for v in (66, 6, 13)]),     # Poison
              '#': tuple([rgb_rescale(v) for v in (119, 107, 122)]), # Walls of the maze
-             'P': tuple([rgb_rescale(v) for v in (153, 85, 74)]),   # Player
-             'a': tuple([rgb_rescale(v) for v in (107, 132, 102)]), # Patroller A
-             'b': tuple([rgb_rescale(v) for v in (107, 132, 102)])} # Patroller B
+             'P': tuple([rgb_rescale(v) for v in (153, 85, 74)])}   # Player
 
 
 def converter(obs):
@@ -29,12 +29,12 @@ def converter(obs):
 
 
 def main():
-    env = gym.make("maze-v0")
+    env = gym.make("sparse")
     act = deepq.learn(
                     env, 
                     network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
                     total_timesteps=0,
-                    load_path="./logs/maze2/gamma08/1/maze.pkl")
+                    load_path=dirs)
     
     while True:
         obs, screen_obs = env.reset_with_render()

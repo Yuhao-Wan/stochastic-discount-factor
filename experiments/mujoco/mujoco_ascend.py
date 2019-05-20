@@ -6,7 +6,7 @@ from baselines import bench
 from baselines import logger
 from baselines.ppo2 import ppo2
 from baselines.common.vec_env import DummyVecEnv
-import ppo2
+from ppo import ppo2
 
 
 dirs = './logs/mujoco/ascend/'
