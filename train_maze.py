@@ -13,6 +13,7 @@ from baselines.common import plot_util as pu
 
 def main(seed, fraction, discount, path, gpu):
     with tf.device('/device:GPU:%s' % gpu):
+      
         logger.configure(dir='./logs/maze1-ascend/%s/%s/' % (path, seed), format_strs=['csv'])
 
         kwargs = dict(seed=seed,
@@ -24,13 +25,13 @@ def main(seed, fraction, discount, path, gpu):
             exploration_final_eps=0.02, 
             learning_starts=2000,
             target_network_update_freq=500,
-            gamma=discount,
             #myopic_fraction=fraction,
             #final_gamma=discount,
+            gamma=discount,
             prioritized_replay=True,
             prioritized_replay_alpha=0.6,
             print_freq=5)
-
+       
         f = open('./logs/myo-exp/%s/%s/params.txt' % (path, seed), 'w')
         f.write(str(kwargs))
         f.close()
@@ -39,7 +40,7 @@ def main(seed, fraction, discount, path, gpu):
         act = deepq.learn(
             env=env,
             **kwargs)
-        
+                      
         print("Saving model to maze.pkl")
 
         act.save("./logs/myo-exp/%s/%s/maze.pkl" % (path, seed))

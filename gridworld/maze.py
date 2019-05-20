@@ -16,9 +16,45 @@ from pycolab.prefab_parts import sprites as prefab_sprites
 
 MAZES_ART = [
     # Maze #1
+    ['####################',
+     '#P $ @ $ @ $ @ $ @ #',
+     '# @ $ $ $ $ $ $ $ $#',
+     '######  a    #######',
+     '#$ $ @ $ $ $ $ @ $ #',
+     '# $ $ $ $ @ $ $ $ $#',
+     '##########    b  ###',
+     '#$ $ @ $ $ $ $ $ @ #',
+     '# $ $ $ @ $ $ @ $ $#',
+     '####################'],
+    
+    # Maze #2
+    ['###########  #######',
+     '#        @#  #     #',
+     '#  ####   ####  ####',
+     '#  #  #            #',
+     '#  #  #  ###  #### #',
+     '#  #  #  # #  #  # #',
+     '#  #  # $# #  #  # #',
+     '#  #  #### #  #  # #',
+     '#P #       ####  #$#',
+     '####             ###'],
+  
+    # Maze #3
     ['################################',
      '#$ $ $ $ $ $ $  P             *#',
      '################################']]
+
+
+# The "teaser observations" (see docstring) have their top-left corners at these
+# row, column maze locations. (The teaser window is 12 rows by 20 columns.)
+TEASER_CORNER = [(0, 0),    # For level 0
+                 (0, 0)]    # For level 1
+
+# For dramatic effect, none of the levels start the game with the first
+# observation centred on the player; instead, the view in the window is shifted
+# such that the player is this many rows, columns away from the centre.
+STARTER_OFFSET = [(0, 0),   # For level 0
+                  (0, 0)]   # For level 1
 
 
 # These colours are only for humans to see in the CursesUi.
@@ -141,11 +177,13 @@ class MazeEnv(gym.Env):
         return ob
 
     def reset(self):
+        #self._game = make_game(1)
         self._game = make_game(0)
         observation, _, _ = self._game.its_showtime()
         return self._to_obs(observation)
 
     def reset_with_render(self):
+        #self._game = make_game(1)
         self._game = make_game(0)
         observation, _ , _ = self._game.its_showtime()
         return self._to_obs(observation), observation
