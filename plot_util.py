@@ -60,12 +60,14 @@ COLORS = ['palevioletred', 'darkcyan', 'peru', 'seagreen', 'indianred', 'slategr
 
 def xy_fn(r):
     x = np.divide(r.progress.steps, 1000)
-    y = smooth(r.progress["mean 100 episode reward"], radius=1)
+    y = smooth(r.progress["mean 100 episode reward"], radius=1)    
+    #x = np.divide(r.progress.total_timesteps, 1000)
+    #y = smooth(r.progress.eprewmean, radius=1)
     return x,y
 
 def split_fn(r):
     import re 
-    match = re.search(r'[^/-]+(?=(-\d+)?\Z)', r.dirname.split('/')[-2])
+    match = re.search(r'[^/-]+(?=(-\d+)?\Z)', r.dirname.split('/')[-1])
     if match:
         return match.group(0)
 
@@ -102,7 +104,7 @@ def plot_results(
 
     f, axarr = plt.subplots(nrows, ncols, sharex=False, squeeze=False, figsize=figsize)
 
-    groups = list(set(group_fn(result) for result in allresults))
+    groups = sorted(list(set(group_fn(result) for result in allresults)))
 
     default_samples = 512
     if average_group:
@@ -169,6 +171,7 @@ def plot_results(
                 g2l.values(),
                 ['%s (%i)'%(g, g2c[g]) for g in g2l] if average_group else g2l.keys(),
                 loc=2 if legend_outside else 4,
+                prop={'size': 21},
                 bbox_to_anchor=(1,1) if legend_outside else None)
         ax.set_title(sk)
         # add xlabels, but only to the bottom row
