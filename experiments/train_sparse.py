@@ -42,7 +42,7 @@ def main(seed, fraction, discount, path, gpu):
         f.write(str(kwargs))
         f.close()
 
-        env = gym.make("sparse")
+        env = gym.make("Sparse-v0")
         act = deepq.learn(
             env=env,
             **kwargs)

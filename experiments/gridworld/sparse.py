@@ -2,14 +2,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import curses
+
 import gym
 import sys
 import numpy as np
 
 from pycolab import ascii_art
-from pycolab import cropping
-from pycolab import human_ui
 from pycolab import things as plab_things
 from pycolab.prefab_parts import sprites as prefab_sprites
 
@@ -51,13 +49,12 @@ def make_game(level):
   """Builds and returns a Better Scrolly Maze game for the selected level."""
   return ascii_art.ascii_art_to_game(
       MAZES_ART[level], what_lies_beneath=' ',
-      sprites={
-          'P': PlayerSprite},
+      sprites={'P': PlayerSprite},
       drapes={
           '$': CashDrape,
           '@': PoisonDrape},
-      update_schedule=['P', '$','@'],
-      z_order='$@P')
+      update_schedule=['P','$','@'],
+      z_order='P$@')
 
 
 class PlayerSprite(prefab_sprites.MazeWalker):
@@ -88,35 +85,6 @@ class PlayerSprite(prefab_sprites.MazeWalker):
       self.num_steps = 0
 
 
-class PatrollerSprite(prefab_sprites.MazeWalker):
-  """Wanders back and forth horizontally, killing the player on contact."""
-
-  def __init__(self, corner, position, character):
-    """Constructor: list impassables, initialise direction."""
-    super(PatrollerSprite, self).__init__(
-        corner, position, character, impassable='#')
-    # Choose our initial direction based on our character value.
-    self._moving_east = bool(ord(character) % 2)
-
-  def update(self, actions, board, layers, backdrop, things, the_plot):
-    del actions, backdrop  # Unused.
-
-    # We only move once every two game iterations.
-    if the_plot.frame % 2:
-      self._stay(board, the_plot)  # Also not strictly necessary.
-      return
-
-    # If there is a wall next to us, we ought to switch direction.
-    row, col = self.position
-    if layers['#'][row, col-1]: self._moving_east = True
-    if layers['#'][row, col+1]: self._moving_east = False
-
-    # Make our move. If we're now in the same cell as the player, it's instant
-    # game over!
-    (self._east if self._moving_east else self._west)(board, the_plot)
-    if self.position == things['P'].position: the_plot.terminate_episode()
-
-
 class CashDrape(plab_things.Drape):
   """A `Drape` handling all of the coins.
 
@@ -137,10 +105,10 @@ class CashDrape(plab_things.Drape):
 
 
 class PoisonDrape(plab_things.Drape):
-  """A `Drape` handling all of the coins.
+  """A `Drape` handling all of the poison.
 
-  This Drape detects when a player traverses a coin, removing the coin and
-  crediting the player for the collection. Terminates if all coins are gone.
+  This Drape detects when a player touches poison, removing the poison and
+  charging the player for the collection.
   """
 
   def update(self, actions, board, layers, backdrop, things, the_plot):
@@ -159,7 +127,7 @@ class MazeEnv(gym.Env):
     Wrapper to adapt to OpenAI's gym interface.
     """
     action_space = gym.spaces.Discrete(4)  
-    observation_space = gym.spaces.Box(low=0, high=1, shape=[10, 20, 6], dtype=np.uint8) # need to change row, column number when modify environment
+    observation_space = gym.spaces.Box(low=0, high=1, shape=[10, 20, 4], dtype=np.uint8)
     def _to_obs(self, observation):
         hallway = observation.layers[' '] 
         ob = np.stack([observation.layers[c] for c in 'P$@'] + [hallway], axis=2).astype(np.uint8)

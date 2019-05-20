@@ -2,14 +2,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import curses
 import gym
 import sys
 import numpy as np
 
 from pycolab import ascii_art
-from pycolab import cropping
-from pycolab import human_ui
 from pycolab import things as plab_things
 from pycolab.prefab_parts import sprites as prefab_sprites
 

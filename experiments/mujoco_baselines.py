@@ -8,7 +8,7 @@ from baselines.ppo2 import ppo2
 from baselines.common.vec_env import DummyVecEnv
 
 
-dirs = './logs/mujoco/baselines/'
+dirs = '../logs/mujoco/baselines/'
 
 
 def main(gpu, envid, seed, path):

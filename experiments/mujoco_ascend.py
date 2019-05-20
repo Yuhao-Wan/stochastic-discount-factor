@@ -9,7 +9,7 @@ from baselines.common.vec_env import DummyVecEnv
 from ppo import ppo2
 
 
-dirs = './logs/mujoco/ascend/'
+dirs = '../logs/mujoco/ascend/'
 
 
 def main(gpu, envid, seed, lam_fraction, final_lam, path):

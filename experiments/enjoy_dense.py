@@ -9,8 +9,7 @@ from baselines.common import models
 from pycolab import rendering
 
 
-
-dirs = "./logs/maze1/gamma099/1/maze.pkl"
+dirs = "../logs/maze1/gamma08/1/maze.pkl"
 
 def rgb_rescale(v):
     return v/255
@@ -32,7 +31,7 @@ def converter(obs):
 
 
 def main():
-    env = gym.make("dense")
+    env = gym.make("dense-v0")
     act = deepq.learn(
                     env, 
                     network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
