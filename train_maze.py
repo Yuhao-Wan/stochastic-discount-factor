@@ -5,28 +5,28 @@ import numpy as np
 import gridworld
 import matplotlib.pyplot as plt
 
+import deepq
 from baselines import logger
-from baselines import deepq
 from baselines.common import models
 from baselines.common import plot_util as pu
 
 
 def main(seed, fraction, discount, path, gpu):
     with tf.device('/device:GPU:%s' % gpu):
-
-
-        logger.configure(dir='./logs/myo-exp/%s/%s/' % (path, seed), format_strs=['csv'])
+        logger.configure(dir='./logs/maze1-ascend/%s/%s/' % (path, seed), format_strs=['csv'])
 
         kwargs = dict(seed=seed,
             network=models.mlp(num_layers=2, num_hidden=128, activation=tf.nn.relu),
             lr=1e-4,
             total_timesteps=1500000,
             buffer_size=150000,
-            exploration_fraction=0.5,
-            exploration_final_eps=0.02,
+            exploration_fraction=0.2,
+            exploration_final_eps=0.02, 
             learning_starts=2000,
             target_network_update_freq=500,
             gamma=discount,
+            #myopic_fraction=fraction,
+            #final_gamma=discount,
             prioritized_replay=True,
             prioritized_replay_alpha=0.6,
             print_freq=5)
@@ -38,8 +38,8 @@ def main(seed, fraction, discount, path, gpu):
         env = gym.make("maze-v0")
         act = deepq.learn(
             env=env,
-            **kwargs
-        )
+            **kwargs)
+        
         print("Saving model to maze.pkl")
 
         act.save("./logs/myo-exp/%s/%s/maze.pkl" % (path, seed))
@@ -47,7 +47,6 @@ def main(seed, fraction, discount, path, gpu):
 
 
 def save_plot(path, seed):
-
     results = pu.load_results('./logs/myo-exp/%s/%s/' % (path, seed))
     r = results[0]
     plt.plot(r.progress.steps, r.progress["mean 100 episode reward"])
@@ -61,4 +60,3 @@ if __name__ == '__main__':
     path = sys.argv[4]
     gpu = sys.argv[5]
     main(seed, fraction, discount, path, gpu)
-
