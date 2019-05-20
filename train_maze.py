@@ -11,8 +11,9 @@ from baselines.common import models
 from baselines.common import plot_util as pu
 
 
-def main(seed, discount, path, gpu):
+def main(seed, fraction, discount, path, gpu):
     with tf.device('/device:GPU:%s' % gpu):
+
 
         logger.configure(dir='./logs/myo-exp/%s/%s/' % (path, seed), format_strs=['csv'])
 
@@ -40,20 +41,24 @@ def main(seed, discount, path, gpu):
             **kwargs
         )
         print("Saving model to maze.pkl")
+
         act.save("./logs/myo-exp/%s/%s/maze.pkl" % (path, seed))
         save_plot(path, seed)
 
 
 def save_plot(path, seed):
+
     results = pu.load_results('./logs/myo-exp/%s/%s/' % (path, seed))
     r = results[0]
     plt.plot(r.progress.steps, r.progress["mean 100 episode reward"])
     plt.savefig('./logs/myo-exp/%s/%s/plot.png' % (path, seed))
 
+
 if __name__ == '__main__':
     seed = int(sys.argv[1])
-    discount = float(sys.argv[2])
-    path = sys.argv[3]
-    gpu = sys.argv[4]
-    main(seed, discount, path, gpu)
+    fraction = float(sys.argv[2])
+    discount = float(sys.argv[3])
+    path = sys.argv[4]
+    gpu = sys.argv[5]
+    main(seed, fraction, discount, path, gpu)
 
