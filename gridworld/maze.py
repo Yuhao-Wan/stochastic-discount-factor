@@ -37,7 +37,12 @@ MAZES_ART = [
      '#  #  # $# #  #  # #',
      '#  #  #### #  #  # #',
      '#P #       ####  #$#',
-     '####             ###']]
+     '####             ###'],
+  
+    # Maze #3
+    ['################################',
+     '#$ $ $ $ $ $ $  P             *#',
+     '################################']]
 
 
 # The "teaser observations" (see docstring) have their top-left corners at these
@@ -51,17 +56,18 @@ TEASER_CORNER = [(0, 0),    # For level 0
 STARTER_OFFSET = [(0, 0),   # For level 0
                   (0, 0)]   # For level 1
 
+
 # These colours are only for humans to see in the CursesUi.
 COLOUR_FG = {' ': (0, 0, 0),        # Default black background
              '$': (999, 862, 110),  # Shimmering golden coins
+             '*': (185, 242, 255),  # Diamond
              '@': (66, 6, 13),      # Poison
              '#': (764, 0, 999),    # Walls of the maze
-             'P': (0, 999, 999),    # This is you, the player
-             'a': (999, 0, 780),    # Patroller A
-             'b': (145, 987, 341)}  # Patroller B
+             'P': (0, 999, 999)}    # Player
 
 COLOUR_BG = {'$': (0, 0, 0),
-             '@': (0, 0, 0) }  # So the coins look like $ and not solid blocks.
+             '*': (0, 0, 0),
+             '@': (0, 0, 0)}  # So the coins look like $ and not solid blocks.
 
 
 def make_game(level):
@@ -69,37 +75,13 @@ def make_game(level):
   return ascii_art.ascii_art_to_game(
       MAZES_ART[level], what_lies_beneath=' ',
       sprites={
-          'P': PlayerSprite,
-          'a': PatrollerSprite,
-          'b': PatrollerSprite},
+          'P': PlayerSprite},
       drapes={
           '$': CashDrape,
+          '*': DiamondDrape,
           '@': PoisonDrape},
-      update_schedule=['a', 'b', 'P', '$','@'],
-      z_order='ab$@P')
-
-
-def make_croppers(level):
-  """Builds and returns `ObservationCropper`s for the selected level.
-
-  We make three croppers for each level: one centred on the player, one centred
-  on one of the Patrollers (scary!), and one centred on a tantalising hoard of
-  coins somewhere in the level (motivating!)
-
-  Args:
-    level: level to make `ObservationCropper`s for.
-
-  Returns:
-    a list of three `ObservationCropper`s.
-  """
-  return [
-      # The player view.
-      cropping.ScrollingCropper(rows=10, cols=20, to_track=['P'],
-                                initial_offset=STARTER_OFFSET[level]),
-      # The teaser!
-      cropping.FixedCropper(top_left_corner=TEASER_CORNER[level],
-                            rows=10, cols=31, pad_char=' '),
-  ]
+      update_schedule=['P', '$','*','@'],
+      z_order='$*@P')
 
 
 class PlayerSprite(prefab_sprites.MazeWalker):
@@ -115,48 +97,15 @@ class PlayerSprite(prefab_sprites.MazeWalker):
     del backdrop, things, layers  # Unused
     self.num_steps += 1
 
-    if actions == 0:    # go upward
-      self._north(board, the_plot)
-    elif actions == 1:  # go downward
-      self._south(board, the_plot)
-    elif actions == 2:  # go leftward
+    if actions == 0:  # go leftward
       self._west(board, the_plot)
-    elif actions == 3:  # go rightward
+    elif actions == 1:  # go rightward
       self._east(board, the_plot)
-    elif actions == 4:  # stay put
+    elif actions == 2:  # stay put
       self._stay(board, the_plot)
-    if self.num_steps == 200: # terminate when reached max episode steps
+    if self.num_steps == 50: # terminate when reached max episode steps
       the_plot.terminate_episode()
       self.num_steps = 0
-
-
-class PatrollerSprite(prefab_sprites.MazeWalker):
-  """Wanders back and forth horizontally, killing the player on contact."""
-
-  def __init__(self, corner, position, character):
-    """Constructor: list impassables, initialise direction."""
-    super(PatrollerSprite, self).__init__(
-        corner, position, character, impassable='#')
-    # Choose our initial direction based on our character value.
-    self._moving_east = bool(ord(character) % 2)
-
-  def update(self, actions, board, layers, backdrop, things, the_plot):
-    del actions, backdrop  # Unused.
-
-    # We only move once every two game iterations.
-    if the_plot.frame % 2:
-      self._stay(board, the_plot)  # Also not strictly necessary.
-      return
-
-    # If there is a wall next to us, we ought to switch direction.
-    row, col = self.position
-    if layers['#'][row, col-1]: self._moving_east = True
-    if layers['#'][row, col+1]: self._moving_east = False
-
-    # Make our move. If we're now in the same cell as the player, it's instant
-    # game over!
-    (self._east if self._moving_east else self._west)(board, the_plot)
-    if self.position == things['P'].position: the_plot.terminate_episode()
 
 
 class CashDrape(plab_things.Drape):
@@ -174,6 +123,25 @@ class CashDrape(plab_things.Drape):
     if self.curtain[player_pattern_position]:
       the_plot.log('Coin collected at {}!'.format(player_pattern_position))
       the_plot.add_reward(100)
+      self.curtain[player_pattern_position] = False
+      if not self.curtain.any(): the_plot.terminate_episode()
+
+
+class DiamondDrape(plab_things.Drape):
+  """A `Drape` handling all of the coins.
+
+  This Drape detects when a player traverses a coin, removing the coin and
+  crediting the player for the collection. Terminates if all coins are gone.
+  """
+
+  def update(self, actions, board, layers, backdrop, things, the_plot):
+    # If the player has reached a coin, credit reward 100 and remove the coin
+    # from the scrolling pattern. If the player has obtained all coins, quit!
+    player_pattern_position = things['P'].position
+
+    if self.curtain[player_pattern_position]:
+      the_plot.log('Diamond collected at {}!'.format(player_pattern_position))
+      the_plot.add_reward(10000)
       self.curtain[player_pattern_position] = False
       if not self.curtain.any(): the_plot.terminate_episode()
 
@@ -196,24 +164,27 @@ class PoisonDrape(plab_things.Drape):
       self.curtain[player_pattern_position] = False
       if not self.curtain.any(): the_plot.terminate_episode()
 
+
 class MazeEnv(gym.Env):
     """
     Wrapper to adapt to OpenAI's gym interface.
     """
-    action_space = gym.spaces.Discrete(4)  
-    observation_space = gym.spaces.Box(low=0, high=1, shape=[10, 20, 6], dtype=np.uint8) # need to change row, column number when modify environment
+    action_space = gym.spaces.Discrete(3)  
+    observation_space = gym.spaces.Box(low=0, high=1, shape=[3, 32, 5], dtype=np.uint8)
     def _to_obs(self, observation):
         hallway = observation.layers[' '] 
-        ob = np.stack([observation.layers[c] for c in 'Pab$@'] + [hallway], axis=2).astype(np.uint8)
+        ob = np.stack([observation.layers[c] for c in 'P$*@'] + [hallway], axis=2).astype(np.uint8)
         return ob
 
     def reset(self):
-        self._game = make_game(1)
+        #self._game = make_game(1)
+        self._game = make_game(0)
         observation, _, _ = self._game.its_showtime()
         return self._to_obs(observation)
 
     def reset_with_render(self):
-        self._game = make_game(1)
+        #self._game = make_game(1)
+        self._game = make_game(0)
         observation, _ , _ = self._game.its_showtime()
         return self._to_obs(observation), observation
 

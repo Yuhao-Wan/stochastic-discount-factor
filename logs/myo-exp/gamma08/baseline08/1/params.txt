@@ -1,0 +1,1 @@
+{'seed': 1, 'network': <function mlp.<locals>.network_fn at 0x7f391bc17400>, 'lr': 0.0001, 'total_timesteps': 1500000, 'buffer_size': 150000, 'exploration_fraction': 0.2, 'exploration_final_eps': 0.02, 'learning_starts': 2000, 'target_network_update_freq': 500, 'gamma': 0.8, 'prioritized_replay': True, 'prioritized_replay_alpha': 0.6, 'print_freq': 5}
