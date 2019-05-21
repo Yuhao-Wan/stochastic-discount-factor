@@ -1,5 +1,5 @@
 ## Time Varying Discount
----
+
 
 Discount factor in Deep Q-Networks serves a dual role:
 
@@ -13,7 +13,7 @@ To see more details, feel free to checkout this [blogpost](https://yuhao-wan.git
 This work (and this repo) is ongoing. Stay tuned for more principled way to adjust discount factor throughout training.
 
 ## Prerequisites
----
+
 
 1. Create and activate a virtual environment
 
@@ -39,7 +39,7 @@ This work (and this repo) is ongoing. Stay tuned for more principled way to adju
 
 
 ## Training Models
----
+
 
 ### Example 1. DQN with Time Varying Discount
 
@@ -81,7 +81,7 @@ More modifications:
 In ```mujoco_ascend.py```, you can also modify the path via ```dirs```, or any parameters specified in ```kwargs```.
 
 ## Loading and visualizing saved models
----
+
 To visualize the saved model for the DQN with myopia on Gridworld environment, run the following commands:
 
 ```
@@ -90,7 +90,7 @@ python enjoy_dense.py
 ```
 
 ## Loading and visualizing learning curves
----
+
 To plot learning curves, run the following command:
 
 ```
