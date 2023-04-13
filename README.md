@@ -8,7 +8,7 @@ Discount factor in Deep Q-Networks serves a dual role:
 
 The time varying discount, or myopic schedule, is a practical method to weigh earlier experience less during the myopic fraction training period. The experiment results demonstrate that the simple myopia scheme is a robust and effective way to improve performance for DRL algorithms.
 
-To see more details, feel free to checkout this [blogpost](https://yuhao-wan.github.io/blog/exploring-gamma/). 
+To see more details, feel free to checkout this [demo video](https://youtu.be/4u218xVkjmQ?t=1049). 
 
 This work (and this repo) is ongoing. Stay tuned for more principled way to adjust discount factor throughout training.
 
